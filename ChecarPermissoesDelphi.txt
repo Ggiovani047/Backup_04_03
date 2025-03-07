@@ -1,0 +1,42 @@
+procedure TfrmPrincipal.ChecarPermissões;
+var Qry: TZQuery; i, j:Integer;
+begin
+  try
+    Qry:=TZQuery.Create(nil);
+    Qry.Connection:=dtmPrincipal.ConexaoDB;
+    Qry.SQL.clear;
+    Qry.SQL.Add('SELECT ua.acaoAcessoId, ua.usuarioId,ua.ativo,a.chave FROM ' +
+                ' usuariosAcaoAcesso as ua ' +
+                ' inner join AcaoAcesso as a on a.acaoAcessoId = ua.acaoAcessoId ' +
+                ' WHERE ua.usuarioId = :usuarioId');
+    Qry.ParamByName('usuarioId').AsInteger := oUsuarioLogado.codigo;
+    Qry.Open;
+    Qry.First;
+    while not Qry.Eof do begin
+      if Qry.FieldByName('ativo').AsBoolean=False then
+      begin
+        for i:=0 to mainPrincipal.Items.Count-1 do begin
+          OcultarSubmenus(mainPrincipal.Items[i], Qry.FieldByName('chave').AsString)
+        end;
+      end;
+      Qry.Next;
+    end;
+
+  finally
+    if Assigned(Qry) then
+      FreeAndNil(Qry);
+
+  end;
+
+end;
+
+procedure TfrmPrincipal.OcultarSubmenus(aMenuItem: TMenuItem; aChave: string);
+  var
+    j: Integer;
+  begin
+    for j := 0 to aMenuItem.Count - 1 do
+    begin
+      if aMenuItem.Items[j].Name = aChave then
+        aMenuItem.Items[j].Visible := False;
+    end;
+  end;
