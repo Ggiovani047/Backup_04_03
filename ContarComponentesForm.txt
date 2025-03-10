@@ -1,0 +1,37 @@
+class function TAtualizaBancoDados.ContarComponentesForm(const aForm: TForm; aConexao:TZConnection): Integer;
+var
+  ContadorDeComponentes, i: Integer;
+  Qry: TZQuery;
+begin
+  try
+    ContadorDeComponentes := aform.ComponentCount;
+    Qry:= TZQuery.Create(nil);
+    Qry.Connection := aConexao;
+    Qry.SQL.Clear;
+    Qry.SQL.Add('SELECT COUNT(formId) AS Qtde, quantidadeComponents FROM componentsForm WHERE nomeForm = :nomeForm ' +
+                ' GROUP BY quantidadeComponents ' );
+    Qry.ParamByName('nomeForm').AsString := aform.Name;
+    Qry.Open;
+    result:= Qry.FieldByName('quantidadeComponents').AsInteger;
+
+    if Qry.FieldByName('Qtde').AsInteger > 0 then begin
+      Qry.Close;
+      Qry.SQL.Clear;
+      Qry.SQL.Add('UPDATE componentsForm SET quantidadeComponents ' +
+                  ' = :quantidadeComponents WHERE nomeForm = :nomeForm ');
+      Qry.ParamByName('quantidadeComponents').asInteger := ContadorDeComponentes;
+      Qry.ParamByName('nomeForm').AsString := aform.Name;
+      Qry.ExecSQL;
+    end
+    else
+      Qry.Close;
+      Qry.SQL.Clear;
+      Qry.SQL.Add('INSERT INTO componentsForm (nomeForm, quantidadeComponents) ' +
+                  ' VALUES (:nomeForm, :quantidadeComponents) ');
+      Qry.ParamByName('quantidadeComponents').asInteger := ContadorDeComponentes;
+      Qry.ParamByName('nomeForm').AsString := aform.Name;
+      Qry.ExecSQL;
+  finally
+    if Assigned(Qry) then
+      FreeAndNil(Qry);
+  end;
