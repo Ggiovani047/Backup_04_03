@@ -1,3 +1,6 @@
+// Verificação se o numero de componentes em um form foi alterado
+// Útil para evitar que a função PreencherAcoes Seja chamada sem necessidade, assim otimizando a inicialização do sitema
+
 class function TAtualizaBancoDados.ContarComponentesForm(const aForm: TForm; aConexao:TZConnection): Integer;
 var
   ContadorDeComponentes, i: Integer;
@@ -35,3 +38,26 @@ begin
     if Assigned(Qry) then
       FreeAndNil(Qry);
   end;
+
+
+//////////////////////
+//Função chamada Aqui
+//////////////////////
+
+class procedure TAcaoAcesso.CriarAcoes(aNomeForm: TFormClass;
+  aConexao: TZConnection);
+var form:TForm;
+begin
+  try
+    form := aNomeForm.Create(Application);
+    if TAtualizaBancoDados.ContarComponentesForm(form, aConexao) <> form.ComponentCount then
+        PreencherAcoes(form,aConexao);
+  finally
+    if assigned(form) then
+      form.Release;
+  end;
+end;
+
+///////////////////////
+//Função chamada Aqui
+///////////////////////
