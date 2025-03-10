@@ -61,3 +61,26 @@ end;
 ///////////////////////
 //Função chamada Aqui
 ///////////////////////
+
+
+//////////////////////
+//Criação da tabela em tempo de execução caso ainda não exista no banco de dados
+/////////////////////
+
+procedure TAtualizacaoTabelaMSSQL.ComponentsForm;
+begin
+  if not TabelaExiste(' ComponentsForm ') then
+  begin
+     ExecutaDiretoBancoDeDados(' CREATE TABLE ComponentsForm (' +
+                               '  formId INT NOT NULL IDENTITY(1,1),' +
+                               '  nomeForm VARCHAR(60) NOT NULL,' +
+                               '  quantidadeComponents INT NOT NULL,' +
+                               '  PRIMARY KEY (formId) ' );
+  end;
+end;
+
+//////////////////////
+//Criação da tabela em tempo de execução caso ainda não exista no banco de dados
+/////////////////////
+
+
