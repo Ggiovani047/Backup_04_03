@@ -1,0 +1,131 @@
+unit cCep;
+
+interface
+
+uses System.Classes, Vcl.Controls, Vcl.ExtCtrls, Vcl.Dialogs,
+      ZAbstractConnection, ZConnection,ZAbstractRODataset,
+      ZAbstractDataset, ZDataset,System.SysUtils,
+      System.Net.HttpClient, System.Net.URLClient, System.JSON;
+
+type
+  TCep = class
+  private
+    ConexaoDB: TZConnection;
+    cep: String;
+    F_Logradouro: String;
+    F_Bairro: String;
+    F_Localidade: String;
+    F_UF: String;
+
+  public
+    constructor Create(aConexao: TZConnection; aCep: string);
+    destructor Destroy; override;
+    function ObterDados: Boolean;
+
+  published
+    property endereco:String read F_Logradouro write F_Logradouro;
+    property bairro: String  read F_Bairro     write F_Bairro;
+    property cidade: String  read F_Localidade write F_Localidade;
+    property estado: String  read F_UF     write F_UF;
+  end;
+
+
+implementation
+
+{ TCep }
+{$region 'Constructor and destructor'}
+constructor TCep.Create(aConexao: TZConnection; aCep: string);
+begin
+  ConexaoDB:=aCOnexao;
+  cep := aCep;
+end;
+
+destructor TCep.Destroy;
+begin
+
+  inherited;
+end;
+{$endregion}
+
+function TCep.ObterDados: Boolean;
+var
+  oHTTP: THttpClient;
+  oResultado: IHTTPResponse;
+  strJson: TJSONValue;
+  oJson: TJSONObject;
+begin
+  result:= False;
+  Try
+    oHTTP := THttpClient.Create;
+    oResultado := oHTTP.Get('https://viacep.com.br/ws/'+StringReplace(cep,'.','',[rfReplaceAll])
+    +'/json');
+
+    if oResultado.StatusCode = 200 then
+      strJson := TJsonObject.ParseJSONValue(oResultado.ContentAsString);
+    if strJson is TJSONObject then begin
+      oJson := TJSONObject(strJson);
+      try
+        Self.F_Logradouro := oJson.GetValue<string>('logradouro');
+        Self.F_Bairro     := oJson.GetValue<string>('bairro');
+        Self.F_Localidade := oJson.GetValue<string>('localidade');
+        Self.F_UF     := oJson.GetValue<string>('uf');
+        result := True;
+      except
+        result := False;
+      end;
+//      if Self.F_Logradouro <> EmptyStr then
+//        result := True;
+    end;
+  Finally
+   if assigned(oJson) then
+      FreeAndNil(oJson);
+
+    if assigned(oHTTP) then
+      FreeAndNil(oHTTP);
+  End;
+
+end;
+
+
+
+
+procedure TfrmCadCliente.edtCEPExit(Sender: TObject);
+var oCep: TCep;
+begin
+  if Length(edtCEP.Text) <> 10 then begin
+    MessageDlg('Este CEP é Inválido',mtInformation,[mbOK],0);
+    abort;
+  end;
+
+  try
+    oCep := TCep.Create(dtmPrincipal.ConexaoDB, edtCep.Text);
+
+    if oCep.ObterDados then begin
+      edtEndereco.Text := oCep.endereco;
+      edtBairro.Text   := oCep.bairro;
+      edtCidade.Text   := oCep.cidade;
+      edtCidade.Enabled := False;
+      edtBairro.Enabled := False;
+      edtEndereco.Enabled := False;
+    end
+    else begin
+      MessageDlg('Este CEP é Inválido',mtInformation,[mbOK],0);
+      edtCidade.Enabled := True;
+      edtBairro.Enabled := True;
+      edtEndereco.Enabled := True;
+      edtEndereco.Text := EmptyStr;
+      edtBairro.Text   := EmptyStr;
+      edtCidade.Text   := EmptyStr;
+    end;
+
+  finally
+    if assigned(oCep) then
+      FreeAndNil(oCep);
+  end;
+
+end;
+
+
+
+
+end.
