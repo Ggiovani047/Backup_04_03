@@ -1,0 +1,144 @@
+procedure TfrmCadCliente.edtTelefoneChange(Sender: TObject);
+var i: Integer;
+begin
+  if Length(edtTelefone.Text) > 0 then begin
+    for i:= 0 to Length(edtTelefone.Text) do begin
+      if edtTelefone.Text[i] = ')' then begin
+        if Length(Copy(edtTelefone.Text, 2, i-2)) > 2 then begin
+          edtTelefone.Text := Telefone;
+          edtTelefone.SelStart := Length(edtTelefone.Text);
+          MessageDlg('O DDD nâo pode ser maior do que 2',mtInformation, [mbOK],0)
+        end;
+      end;
+    end;
+  end;
+
+
+end;
+
+procedure TfrmCadCliente.edtTelefoneKeyPress(Sender: TObject; var Key: Char);
+var TamanhoTexto, Cursor: Integer;
+begin
+  if not (Key in ['0'..'9', #8]) then begin
+    Key := #0;
+  end;
+
+
+  if (edtTelefone.SelStart = 0) and (edtTelefone.Text <> EmptyStr)  then
+    Key := #0;
+
+  Cursor := edtTelefone.SelStart;
+  TamanhoTexto := Length(edtTelefone.Text);
+
+  if Cursor in [1,2,3] then
+    edtTelefone.Text := Copy(edtTelefone.text,1, Cursor+1) + Copy(edtTelefone.text,Cursor+2, Length(edtTelefone.Text));
+
+
+  if Key <> #8 then begin
+    if Copy(edtTelefone.Text, 1, 1) = '0' then begin
+      if Length(edtTelefone.Text) = 4 then begin
+        if TamanhoTexto = Cursor then begin
+          edtTelefone.Text := edtTelefone.Text+' ';
+          edtTelefone.SelStart := Length(edtTelefone.Text);
+        end
+        else begin
+          edtTelefone.Text := edtTelefone.Text+' ';
+          edtTelefone.SelStart := Cursor;
+        end;
+      end
+      else if Length(edtTelefone.Text) = 8 then begin
+        if TamanhoTexto = Cursor then begin
+          edtTelefone.Text := edtTelefone.Text+' ';
+          edtTelefone.SelStart := Length(edtTelefone.Text);
+        end
+        else begin
+          edtTelefone.Text := edtTelefone.Text+' ';
+          edtTelefone.SelStart := Cursor;
+        end;
+      end
+      else if Length(edtTelefone.Text) = 12 then begin
+        edtTelefone.OnKeyPress := edtTelefoneKeyPressBloqueado;
+      end;
+    end
+    else if edtTelefone.Text = '(' then
+      edtTelefone.Text := EmptyStr
+    else if Length(edtTelefone.Text) = 2 then begin
+      if TamanhoTexto = Cursor then begin
+        edtTelefone.Text := '('+edtTelefone.Text+') ';
+        edtTelefone.SelStart := Length(edtTelefone.Text);
+      end
+      else begin
+        edtTelefone.Text := '('+edtTelefone.Text+') ';
+        edtTelefone.SelStart := Cursor;
+      end;
+    end
+    else if Length(edtTelefone.Text) = 3 then begin
+      if TamanhoTexto = Cursor then begin
+        edtTelefone.Text := edtTelefone.Text+') ';
+        edtTelefone.SelStart := Length(edtTelefone.Text);
+      end
+      else begin
+        edtTelefone.Text := edtTelefone.Text+') ';
+        edtTelefone.SelStart := Cursor;
+      end;
+    end
+    else if Length(edtTelefone.Text) = 4 then begin
+      if TamanhoTexto = Cursor then begin
+        edtTelefone.Text := edtTelefone.Text+' ';
+        edtTelefone.SelStart := Length(edtTelefone.Text);
+      end
+      else begin
+        edtTelefone.Text := edtTelefone.Text+' ';
+        edtTelefone.SelStart := Cursor;
+      end;
+    end
+    else if Length(edtTelefone.Text) = 9 then begin
+      if TamanhoTexto = Cursor then begin
+        edtTelefone.Text := edtTelefone.Text+'-';
+        edtTelefone.SelStart := Length(edtTelefone.Text);
+      end
+      else begin
+        edtTelefone.Text := edtTelefone.Text+'-';
+        edtTelefone.SelStart := Cursor;
+      end;
+    end
+    else if (Length(edtTelefone.Text) = 13) and (TamanhoTexto <> Cursor) then begin
+      edtTelefone.Text := stringReplace(edtTelefone.text,'-','',[rfReplaceAll]);
+      edtTelefone.Text := Copy(edtTelefone.Text, 1, 8)+'-'+Copy(edtTelefone.Text, 9, 4);
+      edtTelefone.SelStart := Cursor;
+    end
+    else if Length(edtTelefone.Text) = 14 then begin
+      edtTelefone.Text := StringReplace(edtTelefone.Text,'-','',[rfReplaceAll]);
+      if TamanhoTexto = Cursor then begin
+        edtTelefone.Text := Copy(edtTelefone.Text, 1, 10)+'-'+Copy(edtTelefone.Text, 11, 5);
+        edtTelefone.SelStart := Length(edtTelefone.Text);
+        edtTelefone.OnKeyPress := edtTelefoneKeyPressBloqueado;
+      end
+      else begin
+        edtTelefone.Text := Copy(edtTelefone.Text, 1, 10)+'-'+Copy(edtTelefone.Text, 11, 5);
+        edtTelefone.SelStart := Cursor;
+      end;
+    end
+    else if Length(edtTelefone.Text) = 15 then begin
+       edtTelefone.OnKeyPress := edtTelefoneKeyPressBloqueado;
+    end;
+
+
+   Telefone := edtTelefone.Text;
+  end;
+end;
+
+
+
+procedure TfrmCadCliente.edtTelefoneKeyPressBloqueado(Sender: TObject; var Key: Char);
+begin
+  if not (Key in [#8]) then
+    Key := #0;
+  if Key = #8 then begin
+    edtTelefone.OnKeyPress := edtTelefoneKeyPress;
+    if (Length(edtTelefone.Text) = 15) and (Copy(edtTelefone.Text, 1, 1) <> '0') then begin
+      edtTelefone.Text := StringReplace(edtTelefone.Text,'-','',[rfReplaceAll]);
+      edtTelefone.Text := Copy(edtTelefone.Text, 1, 9)+'-'+Copy(edtTelefone.Text, 10, 5);
+      edtTelefone.SelStart := Length(edtTelefone.Text);
+    end;
+  end;
