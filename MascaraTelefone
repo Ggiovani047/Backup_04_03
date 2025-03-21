@@ -1,0 +1,59 @@
+procedure TfrmCadCliente.edtTelefoneKeyPress(Sender: TObject; var Key: Char);
+ var Telefone: String; posicaoCursor: Integer;
+begin
+  posicaoCursor := edtTelefone.SelStart;
+  if not (Key in ['0'..'9', #8]) then
+    Key := #0;
+  if key <> #8 then begin
+    if (Copy(edtTelefone.Text, 0, 1) = '0') then begin
+       if Length(edtTelefone.Text) = 4 then begin
+          Telefone := edtTelefone.Text+ ' ';
+          edtTelefone.Text := Telefone;
+          edtTelefone.SelStart := Length(edtTelefone.text);
+       end
+       else if Length(edtTelefone.Text) = 8  then begin
+         Telefone := edtTelefone.Text+ ' ';
+         edtTelefone.Text := Telefone;
+         edtTelefone.SelStart := Length(edtTelefone.Text);
+       end
+       else if Length(edtTelefone.Text) = 12 then begin
+          edtTelefone.OnKeyPress := edtTelefoneKeyPressBloqueado;
+          edtTelefone.SelStart := Length(edtTelefone.text);
+       end;
+    end
+    else begin
+      if Length(edtTelefone.Text) = 2 then begin
+        edtTelefone.Text := '('+edtTelefone.text+ ') ';
+        edtTelefone.SelStart := Length(edtTelefone.text);
+      end
+      else if Length(edtTelefone.Text) = 9 then begin
+        edtTelefone.Text := edtTelefone.Text+'-';
+        edtTelefone.SelStart := Length(edtTelefone.text);
+      end
+      else if Length(edtTelefone.Text) = 14 then begin
+        edtTelefone.OnKeyPress := edtTelefoneKeyPressBloqueado;
+        edtTelefone.text := StringReplace(edtTelefone.Text,'-','',[rfReplaceAll]);
+        edtTelefone.Text := Copy(edtTelefone.Text, 1, 10)+'-'+Copy(edtTelefone.Text, 11, 6);
+        edtTelefone.SelStart := Length(edtTelefone.text);
+      end;
+    end;
+  end
+  else if (Length(edtTelefone.Text) = 3) and (Copy(edtTelefone.Text, 0, 1) = '(') then
+    edtTelefone.Text := EmptyStr;
+end;
+
+procedure TfrmCadCliente.edtTelefoneKeyPressBloqueado(Sender: TObject; var Key: Char);
+var posicaoCursor: Integer;
+begin
+  posicaoCursor := edtTelefone.SelStart;
+
+  if not (Key in [#8]) then
+    Key := #0;
+  if Key = #8 then
+    edtTelefone.OnKeyPress := edtTelefoneKeyPress;
+    if (Length(edtTelefone.Text) = 15) and (Copy(edtTelefone.Text, 0, 1) <> '0') then begin
+      edtTelefone.Text := StringReplace(edtTelefone.Text,'-','',[rfReplaceAll]);
+      edtTelefone.Text := Copy(edtTelefone.Text, 1, 9)+'-'+Copy(edtTelefone.Text, 10, 5);
+      edtTelefone.SelStart := posicaoCursor;
+    end;
+  end;
