@@ -1,0 +1,114 @@
+procedure TfrmCadCliente.edtTerceiroKeyPress(Sender: TObject; var Key: Char);
+var Num: string; Cursor: Integer;
+begin
+  if not (Key in ['0'..'9', #8]) then begin
+    Key := #0;
+  end;
+
+  if (Length(edtTerceiro.Text) >= 15) and (key <> #8) then begin
+    Key := #0;
+    Exit;
+  end;
+
+  Cursor := edtTerceiro.SelStart;
+
+  Num := Copy(edtTerceiro.Text, 1, edtTerceiro.SelStart)+Key+
+  Copy(edtTerceiro.Text, edtTerceiro.SelStart+1, Length(edtTerceiro.Text));
+  if Copy(Num,1,1) = '0' then begin
+    if Key <> #8 then begin
+    Num := Copy(edtTerceiro.Text, 1, edtTerceiro.SelStart)+Key+
+    Copy(edtTerceiro.Text, edtTerceiro.SelStart+1, Length(edtTerceiro.Text));
+      case Length(Num) of
+      4: begin
+         edtTerceiro.Text := Num+' ';
+         edtTerceiro.SelStart := Length(edtTerceiro.Text);
+      end;
+      8: begin
+        edtTerceiro.Text := Copy(Num,1,4)+' '+Copy(Num,6,3)+' ';
+        edtTerceiro.SelStart := Length(edtTerceiro.Text);
+      end;
+      14:
+        Key := #0;
+      end;
+    end;
+  end
+  else
+    if Key <> #8 then begin
+    Num := Copy(edtTerceiro.Text, 1, edtTerceiro.SelStart)+Key+
+    Copy(edtTerceiro.Text, edtTerceiro.SelStart+1, Length(edtTerceiro.Text));
+
+      case Length(Num) of
+        1: begin
+          edtTerceiro.Text := RemoveCaracteres(edtTerceiro.Text);
+          Num := RemoveCaracteres(Num);
+          edtTerceiro.Text := '('+Copy(Num,1,2);
+          edtTerceiro.SelStart := Length(edtTerceiro.Text);
+          Key := #0;
+        end;
+        2..5: begin
+          edtTerceiro.Text := RemoveCaracteres(edtTerceiro.Text);
+          Num := RemoveCaracteres(Num);
+          edtTerceiro.Text := '('+Copy(Num,1,2)+') ';
+          edtTerceiro.SelStart := Length(edtTerceiro.Text);
+          Key := #0;
+        end;
+        6..9: begin
+          edtTerceiro.Text := RemoveCaracteres(edtTerceiro.Text);
+          Num := RemoveCaracteres(Num);
+          edtTerceiro.Text := '('+Copy(Num,1,2)+') '+Copy(Num,3,4);
+          edtTerceiro.SelStart := Length(edtTerceiro.Text);
+          Key := #0;
+        end;
+        10..14: begin
+          edtTerceiro.Text := RemoveCaracteres(edtTerceiro.Text);
+          Num := RemoveCaracteres(Num);
+          edtTerceiro.Text := '('+Copy(Num,1,2)+') '+Copy(Num,3,4)+'-'+Copy(Num,7,4);
+          edtTerceiro.SelStart := Length(edtTerceiro.Text);
+          Key := #0;
+        end;
+        15: begin
+          edtTerceiro.Text := RemoveCaracteres(edtTerceiro.Text);
+          Num := RemoveCaracteres(Num);
+          edtTerceiro.Text := '('+Copy(Num,1,2)+') '+Copy(Num,3,5)+'-'+Copy(Num,8,4);
+          edtTerceiro.SelStart := Length(edtTerceiro.Text);
+          Key := #0;
+        end;
+      end;
+  end
+  else begin
+    if edtTerceiro.Text <> EmptyStr then begin
+      Num := edtTerceiro.Text;
+      Delete(Num, edtTerceiro.SelStart, 1);
+      Num := RemoveCaracteres(Num);
+      if edtTerceiro.Text[edtTerceiro.SelStart] in ['-','(',')', ' '] then begin
+      if edtTerceiro.Text[edtTerceiro.SelStart] = '-' then begin
+        Key := #0;
+        Num := edtTerceiro.Text;
+        Num := RemoveCaracteres(Num);
+        edtTerceiro.SelStart := edtTerceiro.SelStart - 1;
+      end
+      else
+        Key := #0;
+        Num := edtTerceiro.Text;
+        Num := RemoveCaracteres(Num);
+        edtTerceiro.SelStart := edtTerceiro.SelStart - 2;
+      end
+      else if Length(Copy(Num, 1,2)) < 1  then begin
+          edtTerceiro.Text := RemoveCaracteres(edtTerceiro.Text);
+          edtTerceiro.SelStart := Length(edtTerceiro.Text)
+      end
+      else if (Length(Copy(Num, 7,1)) < 1) and (edtTerceiro.SelStart > 5) then begin
+          edtTerceiro.Text := StringReplace(edtTerceiro.Text,'-','',[rfReplaceAll]);
+          edtTerceiro.SelStart := Length(edtTerceiro.Text)
+      end
+      else if (Length(Num) < 11) and (edtTerceiro.SelStart > 5) then begin
+        edtTerceiro.Text := RemoveCaracteres(edtTerceiro.Text);
+        Num := RemoveCaracteres(Num);
+        edtTerceiro.Text := '('+Copy(Num,1,2)+') '+Copy(Num,3,4)+'-'+Copy(Num,7,4);
+        edtTerceiro.SelStart := Length(edtTerceiro.Text);
+        Key := #0;
+      end;
+
+  end;
+  end;
+end;
