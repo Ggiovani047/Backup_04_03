@@ -1,0 +1,121 @@
+procedure TfrmCadCliente.edtTelefoneKeyPress(Sender: TObject; var Key: Char);
+var Num: string;
+begin
+  if not (Key in ['0'..'9', #8]) then begin
+    Key := #0;
+  end;
+
+  if (Length(edtTelefone.Text) >= 15) and (key <> #8) then begin
+    Key := #0;
+    Exit;
+  end;
+
+  Num := Copy(edtTelefone.Text, 1, edtTelefone.SelStart)+Key+
+  Copy(edtTelefone.Text, edtTelefone.SelStart+1, Length(edtTelefone.Text));
+  if Copy(Num,1,1) = '0' then begin
+    if Key <> #8 then begin
+    Num := Copy(edtTelefone.Text, 1, edtTelefone.SelStart)+Key+
+    Copy(edtTelefone.Text, edtTelefone.SelStart+1, Length(edtTelefone.Text));
+    Num := RemoveCaracteres(num);
+      case Length(Num) of
+      4: begin
+         edtTelefone.Text := Num+' ';
+         edtTelefone.SelStart := Length(edtTelefone.Text);
+         Key := #0;
+      end;
+      5..6: begin
+        edtTelefone.Text := Copy(Num,1,4)+' '+Copy(Num,5,3);
+        edtTelefone.SelStart := Length(edtTelefone.Text);
+        Key := #0;
+      end;
+      7: begin
+        edtTelefone.Text := Copy(Num,1,4)+' '+Copy(Num,5,3)+' ';
+        edtTelefone.SelStart := Length(edtTelefone.Text);
+        Key := #0;
+      end;
+      8..13: begin
+        edtTelefone.Text := Copy(Num,1,4)+' '+Copy(Num,5,3)+' '+Copy(Num,8,4);
+        edtTelefone.SelStart := Length(edtTelefone.Text);
+        Key := #0;
+      end;
+      14:
+        Key := #0;
+      end;
+    end;
+  end
+  else
+    if Key <> #8 then begin
+      Num := Copy(edtTelefone.Text, 1, edtTelefone.SelStart)+Key+
+      Copy(edtTelefone.Text, edtTelefone.SelStart+1, Length(edtTelefone.Text));
+      edtTelefone.Text := RemoveCaracteres(edtTelefone.Text);
+      Num := RemoveCaracteres(Num);
+        case Length(Num) of
+          1: begin
+            edtTelefone.Text := '('+Copy(Num,1,2);
+            edtTelefone.SelStart := Length(edtTelefone.Text);
+            Key := #0;
+          end;
+          2: begin
+            edtTelefone.Text := '('+Copy(Num,1,2)+') ';
+            edtTelefone.SelStart := Length(edtTelefone.Text);
+            Key := #0;
+          end;
+          3..6: begin
+            edtTelefone.Text := '('+Copy(Num,1,2)+') '+Copy(Num,3,4);
+            edtTelefone.SelStart := Length(edtTelefone.Text);
+            Key := #0;
+          end;
+          7..10: begin
+            edtTelefone.Text := '('+Copy(Num,1,2)+') '+Copy(Num,3,4)+'-'+Copy(Num,7,4);
+            edtTelefone.SelStart := Length(edtTelefone.Text);
+            Key := #0;
+          end;
+          11: begin
+            edtTelefone.Text := '('+Copy(Num,1,2)+') '+Copy(Num,3,5)+'-'+Copy(Num,8,4);
+            edtTelefone.SelStart := Length(edtTelefone.Text);
+            Key := #0;
+          end;
+        end;
+    end
+    else begin
+      if edtTelefone.SelLength > 0 then begin
+        Delete(Num, edtTelefone.SelStart,edtTelefone.SelLength);
+        edtTelefone.Text := Num
+      end;
+
+      if edtTelefone.Text <> EmptyStr then begin
+
+        if edtTelefone.Text[edtTelefone.SelStart] in ['-','(',')', ' '] then begin
+          if edtTelefone.Text[edtTelefone.SelStart] = '-' then begin
+            Key := #0;
+            Num := edtTelefone.Text;
+            Num := RemoveCaracteres(Num);
+            edtTelefone.SelStart := edtTelefone.SelStart - 1;
+        end
+        else
+          Key := #0;
+          Num := edtTelefone.Text;
+          Num := RemoveCaracteres(Num);
+          edtTelefone.SelStart := edtTelefone.SelStart - 2;
+        end;
+        Num := edtTelefone.Text;
+        Delete(Num, edtTelefone.SelStart, 1);
+        Num := RemoveCaracteres(Num);
+
+        if Length(Copy(Num, 1,2)) < 1  then begin
+            edtTelefone.Text := RemoveCaracteres(edtTelefone.Text);
+            edtTelefone.SelStart := Length(edtTelefone.Text)
+        end
+        else if (Length(Copy(Num, 7,1)) < 1) and (edtTelefone.SelStart > 5) then begin
+            edtTelefone.Text := StringReplace(edtTelefone.Text,'-','',[rfReplaceAll]);
+            edtTelefone.SelStart := Length(edtTelefone.Text)
+        end
+        else if (Length(Num) = 10) then begin
+          edtTelefone.Text := RemoveCaracteres(edtTelefone.Text);
+          edtTelefone.Text := '('+Copy(Num,1,2)+') '+Copy(Num,3,4)+'-'+Copy(Num,7,4);
+          edtTelefone.SelStart := Length(edtTelefone.Text);
+          Key := #0;
+        end;
+      end;
+    end;
+end;
